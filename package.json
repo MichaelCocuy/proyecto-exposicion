@@ -1,0 +1,14 @@
+{
+  "name": "la-ultima-cosecha",
+  "version": "1.0.0",
+  "description": "Juego de misterio web para demostrar automatización de pruebas con Playwright: humano vs. agente.",
+  "scripts": {
+    "start": "node server.js",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  },
+  "license": "MIT"
+}

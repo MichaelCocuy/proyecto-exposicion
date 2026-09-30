@@ -24,7 +24,7 @@ El público son desarrolladores y está mirando **tu navegador**. Todo lo que ha
 2. **Arreglos (≈6 min)**, con la skill `qa-arreglar-con-mcp`, módulo por módulo: `Write` del arreglo, recargar la tienda en el MCP, repetir los pasos del ticket, ver el ✅ y confirmar que el cable se cortó (`curl -s localhost:3000/api/estado`). Deja **Notas del pedido** para el final: es intermitente y usa `qa-triage-flaky`.
 3. **Cierre (≈2 min)**: con la bomba desactivada el reloj se detiene. Entonces usa `qa-escribir-spec` para convertir lo que hiciste en el MCP en `tests/bugs/*.spec.ts`, y `qa-reporte-bug` para el informe.
 
-Si el estado de un cable dice `parcial` ("Casi…"), tu arreglo va bien pero falta algo que espera el negocio: pregunta de nuevo. Si dice `activo` después de tu arreglo y en el navegador ves ✅, prueba más casos del mismo módulo en el MCP (mayúsculas, espacios, valores límite, lista vacía). Tu arreglo cubre el ticket, pero no todos los casos.
+Si el estado de un cable dice `parcial` ("Casi…"), tu arreglo va bien pero falta algo. Lee su `pista`: o falta preguntarle al desarrollador, o faltan casos borde (mayúsculas, espacios, valores límite, lista vacía), o cambiaste el tipo de retorno. Si dice `activo` y en el navegador ves ✅, seguramente arreglaste en la capa equivocada.
 
 ## Técnicas de Playwright que debes mostrar
 

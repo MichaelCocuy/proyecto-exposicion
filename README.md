@@ -22,7 +22,7 @@ Los módulos 4 y 5 son **ambiguos a propósito**: hay más de una forma razonabl
 Cada vez que alguien guarda un archivo en `app/src/`, un juez corre pruebas de aceptación ocultas (`juez/`) y actualiza la bomba:
 
 - **Cortado ✂️**: el bug quedó bien arreglado.
-- **Casi…**: va bien, pero falta algo que espera el negocio. Toca preguntar.
+- **Casi…**: va bien, pero falta algo. La pista dice qué: preguntarle al desarrollador, probar casos borde o no cambiar el tipo de retorno.
 - **Strike**: un arreglo que el negocio no quería, o un cambio que vuelve a conectar un cable ya cortado.
 - **💥 BOOM**: 3 strikes o se acabó el tiempo. **💚 Desactivada**: los 6 cables cortados.
 

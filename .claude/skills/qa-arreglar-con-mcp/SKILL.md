@@ -24,8 +24,11 @@ Necesitas la tabla de `qa-plan-bugs`, con el ❌ que reprodujiste y las respuest
 
 5. **Confirma el cable.** `curl -s localhost:3000/api/estado`:
    - `desactivado`: cable cortado. Dilo y pasa al siguiente módulo.
-   - `parcial`: va bien, pero falta algo que espera el negocio. Pregunta al desarrollador y vuelve al paso 2.
-   - `activo`, con ✅ en el navegador: tu arreglo cubre el ticket pero no todos los casos. Prueba más casos en el MCP hasta encontrar el que falla y vuelve al paso 2.
+   - `parcial` ("Casi…"): va bien, pero falta algo. Lee la `pista` del cable:
+     - si pide preguntar al desarrollador, falta una regla de negocio: pregunta y vuelve al paso 2;
+     - si habla de casos borde, tu arreglo cubre el ticket pero no todos los casos: prueba más en el MCP hasta encontrar el que falla y vuelve al paso 2;
+     - si dice que la función debe devolver un número, cambiaste el tipo de retorno: corrígelo.
+   - `activo`, con ✅ en el navegador: probablemente arreglaste en la capa equivocada (`app/app.js`) o tu cambio no toca el caso del bug. Revisa y vuelve al paso 2.
    - `error`: el archivo no carga (error de sintaxis). Corrígelo de inmediato.
    - Revisa también que **ningún otro cable** haya vuelto a `activo`.
 

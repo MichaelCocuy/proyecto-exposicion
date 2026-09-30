@@ -1,24 +1,22 @@
 ---
 name: qa-escribir-spec
-description: Escribe una prueba Playwright que falla por cada bug del plan (tests/bugs/<modulo>.spec.ts), confirma que falla por la razón correcta, arregla app/src/<modulo>.js y la vuelve a correr hasta verla en verde, sin romper los demás módulos. Úsala después de qa-plan-bugs, con las respuestas del desarrollador en la mano.
+description: Convierte lo que el agente hizo en el Playwright MCP durante la partida en pruebas Playwright permanentes (tests/bugs/<modulo>.spec.ts), y demuestra que atrapan los bugs corriéndolas contra el código original (rojo) y contra los arreglos (verde). Úsala al final, con la bomba ya desactivada, para cerrar la demo mostrando que la exploración quedó automatizada.
 ---
 
-Aquí sí escribes código: pruebas en `tests/bugs/` y arreglos en `app/src/`. El ciclo es siempre **rojo → arreglo → verde**. Si no hay prueba roja, no hay arreglo.
+La exploración con el MCP resolvió el problema **una vez**. Esta skill la vuelve **repetible**: cada paso que hiciste en el navegador se convierte en una prueba que cualquiera corre con `npx playwright test`. Es el cierre de la demo.
 
-## Prerrequisito
-
-Necesitas la tabla de `qa-plan-bugs` y las respuestas del desarrollador a los bugs ambiguos. Si falta una respuesta, pregunta antes de escribir la prueba de ese módulo.
+Úsala **con la bomba desactivada** (o explotada), porque con el reloj detenido cambiar `app/src` ya no cuenta strikes.
 
 ## Pasos
 
-1. **Escribe las pruebas rojas, todas primero.** Una por módulo, en `tests/bugs/<modulo>.spec.ts`. Cada una:
-   - entra por la interfaz (`page.goto('/')`) y actúa como el cliente del ticket;
-   - usa localizadores accesibles: `getByLabel('Correo')`, `getByRole('button', { name: 'Ingresar' })`, `getByRole('status')`, dentro de la sección del módulo (`page.locator('#modulo-login')`) para no confundir botones de otros módulos;
-   - comprueba el resultado **que pidió el negocio**, con `expect(...).toHaveText()` o `toContainText()`, que esperan solas;
-   - cubre los casos borde que confirmó el desarrollador, con un `for` sobre una lista de casos cuando son varios;
+1. **Escribe una prueba por módulo** en `tests/bugs/<modulo>.spec.ts`, con los mismos pasos y casos que hiciste en el MCP (`qa-arreglar-con-mcp`, paso 4):
+   - entra por la interfaz (`page.goto('/')`) y actúa dentro de la sección del módulo (`page.locator('#modulo-login')`) para no confundir botones de otros módulos;
+   - usa los mismos localizadores que viste en el snapshot: `getByLabel('Correo')`, `getByRole('button', { name: 'Ingresar' })`, `getByRole('status')`;
+   - comprueba el resultado con `expect(...).toHaveText()` o `toContainText()`, que esperan solas;
+   - usa un `for` sobre la lista de casos cuando probaste varios;
    - lleva un comentario de una línea que cita el ticket.
 
-   Para el módulo intermitente, **controla la red** para que la carrera ocurra siempre:
+   Para **Notas del pedido**, reutiliza el `page.route` que usaste en el MCP (ver `qa-triage-flaky`):
    ```ts
    // La primera respuesta llega tarde y la segunda rápido: el orden que dispara el bug.
    // fulfill (no continue) para que la demora aleatoria del servidor no meta ruido.
@@ -37,21 +35,23 @@ Necesitas la tabla de `qa-plan-bugs` y las respuestas del desarrollador a los bu
    await expect(modulo.getByRole('status')).toHaveText('Guardado: «versión 2»');
    ```
 
-2. **Córrelas y confirma el rojo.** `npx playwright test tests/bugs`. Cada una debe fallar **por el bug** (el valor incorrecto que viste en el plan), no por un selector que no encuentra nada ni por un timeout. Si falla por otra cosa, arregla la prueba primero.
+2. **Verde con los arreglos.** `npx playwright test`. Todas deben pasar. Si una falla, la prueba no refleja lo que hiciste en el MCP: corrígela (es la prueba, no la app).
 
-3. **Arregla un módulo a la vez**, en `app/src/<modulo>.js`:
-   - cambia lo mínimo, sin tocar la firma de la función (la interfaz y el juez la usan tal cual);
-   - guarda el archivo **una sola vez**, con el arreglo completo, porque cada guardado se evalúa;
-   - corre la prueba del módulo: `npx playwright test tests/bugs/<modulo>.spec.ts`.
+3. **Rojo con los bugs originales.** Esto demuestra que las pruebas atrapan los bugs, no que pasan siempre:
+   ```bash
+   git stash push -- app/src        # guarda los arreglos y vuelve al código con bugs
+   npx playwright test tests/bugs   # deben fallar todas
+   git stash pop                    # recupera los arreglos
+   npx playwright test              # todo verde otra vez
+   ```
+   Si una prueba **pasa** con el código original, no está probando el bug: ajústala hasta que falle.
 
-4. **Verde y sin regresiones.** Cuando la prueba pase, corre toda la suite (`npx playwright test`) antes de seguir con el siguiente módulo. Un cable cortado que se vuelve a conectar es un strike.
-
-5. **Confirma el cable.** `curl -s localhost:3000/api/estado` muestra el estado de cada cable. Si tu prueba está en verde pero el cable dice "Casi…", tu prueba no cubre todo lo que espera el negocio: vuelve a preguntar al desarrollador y amplía la prueba antes de cambiar el arreglo.
+4. **Muestra el resultado**: la tabla módulo | casos | rojo con bugs | verde con arreglos, y `npx playwright show-report` para el reporte HTML.
 
 ## Qué evitar
 
-- Escribir la prueba **después** del arreglo. Entonces no demuestra nada.
-- Pruebas que siempre pasan (sin aserción, o con el valor que devuelve el código con bug).
+- Escribir specs durante los 10 minutos: el reloj es para arreglar.
+- Pruebas que pasan también con el código original (sin aserción, o con el valor del bug).
 - `waitForTimeout`, `retries` o timeouts largos para que algo pase.
 - Importar `app/src` desde la prueba: se prueba por la interfaz, como un usuario.
-- Leer `juez/`.
+- Olvidar el `git stash pop`: sin él, la tienda vuelve a tener los bugs.

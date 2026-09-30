@@ -70,18 +70,24 @@ claude --agent qa-playwright
 
 Tiene que correr como **sesión principal**, no como subagente, para poder hacerte preguntas. Dile algo como *"Desactiva la bomba. La tienda está en http://localhost:3000"*.
 
-El agente (`.claude/agents/qa-playwright.md`) trabaja con cuatro skills:
+Todo pasa en el **navegador del Playwright MCP**, que se abre visible. Proyéctalo junto a `/bomba`: el público ve el ❌, el arreglo, el ✅ y el cable que se corta. Al final, con el reloj detenido, el agente convierte lo que hizo en pruebas.
 
-| Skill | Paso |
-|---|---|
-| `qa-plan-bugs` | Lee los tickets, reproduce cada bug en el navegador, clasifica y hace **una ronda de preguntas** |
-| `qa-escribir-spec` | Prueba roja por módulo en `tests/bugs/`, arreglo en `app/src/`, prueba verde |
-| `qa-triage-flaky` | Si una prueba falla a veces: diagnóstico y `page.route` para volverla determinista |
-| `qa-reporte-bug` | Informe final en `reportes/`: causa raíz, arreglo, prueba y línea de tiempo |
+El agente (`.claude/agents/qa-playwright.md`) trabaja con cinco skills:
+
+| Skill | Cuándo | Qué hace |
+|---|---|---|
+| `qa-plan-bugs` | Al empezar | Lee los tickets, reproduce cada bug con el MCP, clasifica y hace **una ronda de preguntas** |
+| `qa-arreglar-con-mcp` | Por cada bug | ❌ en el navegador → arreglo en `app/src/` → ✅ en el navegador → cable cortado |
+| `qa-triage-flaky` | Bug de Notas | Fuerza la carrera con `page.route` para que el ❌ aparezca siempre |
+| `qa-escribir-spec` | Con la bomba desactivada | Convierte los pasos del MCP en `tests/bugs/*.spec.ts`: rojas con los bugs, verdes con los arreglos |
+| `qa-reporte-bug` | Al final | Informe en `reportes/`: causa raíz, arreglo, prueba y línea de tiempo |
+
+Para el bug de Notas, el agente usa `browser_run_code_unsafe`, que siempre pide tu confirmación. Lee el código en pantalla antes de aprobarlo: es parte del show.
 
 ## Reglas
 
-- **Nadie abre `juez/`.** Al agente se lo bloquea `.claude/settings.json`; los desarrolladores dan su palabra.
+- **Nadie abre `juez/`.** Al agente se lo bloquean `.claude/settings.json` y un hook (`.claude/hooks/proteger-juez.mjs`); los desarrolladores dan su palabra. El bloqueo aplica a **cualquier** sesión de Claude Code en esta carpeta: para editar el juez, desactiva la regla un momento.
+- Los permisos que necesita el agente (el MCP, escribir en `app/src/` y `tests/`, correr Playwright) ya están aprobados en `.claude/settings.json`, para que la demo no se detenga en diálogos de permisos.
 - Los arreglos van en `app/src/`. La interfaz (`app/index.html`, `app/app.js`) no tiene bugs.
 - Los desarrolladores arreglan **sin IA**. Los dos equipos pueden hacerle al presentador todas las preguntas que quieran.
 - Mismo cronómetro y mismos tickets para los dos.
@@ -103,7 +109,7 @@ app/                  la tienda con bugs
 panel/                la bomba (/bomba) y el marcador (/marcador)
 juez/                 pruebas de aceptación ocultas y bugs originales (no abrir)
 tests/seed.spec.ts    prueba semilla: los 6 módulos cargan
-.claude/              agente qa-playwright, skills y permisos
+.claude/              agente qa-playwright, skills, permisos y el hook que protege el juez
 scripts/reiniciar.mjs
 server.js             sirve todo y corre el juez cuando cambia app/src
 ```

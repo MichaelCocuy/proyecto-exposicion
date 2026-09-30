@@ -1,5 +1,21 @@
 {
+  "enabledMcpjsonServers": [
+    "playwright"
+  ],
   "permissions": {
+    "allow": [
+      "mcp__playwright",
+      "Edit(./app/src/**)",
+      "Write(./app/src/**)",
+      "Edit(./tests/**)",
+      "Write(./tests/**)",
+      "Write(./reportes/**)",
+      "Bash(npx playwright test:*)",
+      "Bash(curl -s localhost:3000/api/estado)",
+      "Bash(curl -s http://localhost:3000/api/estado)",
+      "Bash(git diff:*)",
+      "Bash(git stash:*)"
+    ],
     "deny": [
       "Read(./juez/**)",
       "Edit(./juez/**)",
@@ -9,6 +25,22 @@
       "Write(./.bomba/**)",
       "Edit(./server.js)",
       "Write(./server.js)"
+    ],
+    "ask": [
+      "mcp__playwright__browser_run_code_unsafe"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Grep|Glob|mcp__playwright__browser_run_code_unsafe",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/proteger-juez.mjs\""
+          }
+        ]
+      }
     ]
   }
 }

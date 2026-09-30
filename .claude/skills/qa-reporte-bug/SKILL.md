@@ -25,11 +25,11 @@ Produce un **informe en markdown** en `reportes/desactivacion-<AAAA-MM-DD-HHMM>.
 ## <#> · <Módulo>: <título en una línea: qué hacía vs. qué debía hacer>
 
 - **Ticket:** “<cita del cliente>”
-- **Reproducción:** pasos mínimos en la tienda y el resultado observado.
+- **Reproducción (MCP):** pasos mínimos en la tienda, el ❌ observado antes del arreglo y el ✅ después.
 - **Preguntas al desarrollador:** la pregunta y la respuesta tal cual. Si no fue necesario preguntar, "No fue necesario: <por qué el comportamiento era claro>".
 - **Causa raíz:** la línea o la lógica exacta en `app/src/<modulo>.js` y por qué fallaba.
 - **Arreglo:** qué cambió (resumen del diff).
-- **Prueba de regresión:** `tests/bugs/<modulo>.spec.ts`, qué casos cubre, y confirmación de que falló antes del arreglo y pasa después.
+- **Prueba de regresión:** `tests/bugs/<modulo>.spec.ts`, qué casos cubre, y el resultado de `qa-escribir-spec`: roja con el código original y verde con el arreglo.
 - **Técnica de Playwright:** la que resolvió este caso (localizadores por rol, `page.route`, pruebas parametrizadas…).
 
 ## Lo que no se resolvió

@@ -1,11 +1,15 @@
 {
-  "name": "la-ultima-cosecha",
+  "name": "desactiva-la-bomba",
   "version": "1.0.0",
-  "description": "Juego de misterio web para demostrar automatización de pruebas con Playwright: humano vs. agente.",
+  "description": "Demo: un agente de Playwright contra un equipo de desarrolladores. Seis bugs, diez minutos, una bomba.",
   "scripts": {
     "start": "node server.js",
+    "start:devs": "PORT=3001 node server.js",
+    "reiniciar": "node scripts/reiniciar.mjs",
     "test": "playwright test",
-    "test:ui": "playwright test --ui"
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "reporte": "playwright show-report"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0"

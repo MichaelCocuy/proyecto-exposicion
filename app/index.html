@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Café La Esmeralda · Panel interno</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <div class="marca">☕ Café La Esmeralda <span>· panel interno</span></div>
+    <a class="estado-bomba" href="/bomba" target="_blank" aria-label="Estado de la bomba">
+      <span id="bomba-tiempo">--:--</span>
+      <span id="bomba-cables">0/6 cables</span>
+      <span id="bomba-strikes">strikes 0/3</span>
+    </a>
+  </header>
+
+  <main>
+    <p class="intro">Seis clientes reportaron fallas. Cada una es un cable de la bomba: arregla el bug y el cable se corta.</p>
+
+    <section class="modulo" id="modulo-login" aria-labelledby="t-login">
+      <h2 id="t-login"><span class="cable rojo"></span>1 · Ingreso</h2>
+      <blockquote class="ticket">“Mi correo es Michael.Cocuy@Trycore.com y el ingreso me dice que es inválido. A veces lo pego con un espacio al final y tampoco.”</blockquote>
+      <form id="form-login">
+        <label>Correo <input name="correo" type="text" autocomplete="off"></label>
+        <label>Clave <input name="clave" type="password"></label>
+        <button type="submit">Ingresar</button>
+      </form>
+      <p class="resultado" role="status" id="resultado-login"></p>
+    </section>
+
+    <section class="modulo" id="modulo-carrito" aria-labelledby="t-carrito">
+      <h2 id="t-carrito"><span class="cable azul"></span>2 · Carrito</h2>
+      <blockquote class="ticket">“Agregué una bolsa de Café Excelso de $19.99 y el carrito dice $19.98. ¿Me están cobrando mal?”</blockquote>
+      <table class="tabla">
+        <thead><tr><th>Producto</th><th>Precio</th><th>Cantidad</th></tr></thead>
+        <tbody id="productos"></tbody>
+      </table>
+      <p class="resultado" role="status">Total: <strong id="total-carrito"></strong></p>
+    </section>
+
+    <section class="modulo" id="modulo-pedidos" aria-labelledby="t-pedidos">
+      <h2 id="t-pedidos"><span class="cable amarillo"></span>3 · Pedidos</h2>
+      <blockquote class="ticket">“Tenemos 23 pedidos registrados, pero los pedidos #21, #22 y #23 no aparecen en la tabla.”</blockquote>
+      <table class="tabla" aria-label="Pedidos">
+        <thead><tr><th>Pedido</th><th>Cliente</th><th>Valor</th></tr></thead>
+        <tbody id="filas-pedidos"></tbody>
+      </table>
+      <nav class="paginacion" aria-label="Paginación de pedidos">
+        <button type="button" id="pagina-anterior">Anterior</button>
+        <span id="pagina-actual" role="status"></span>
+        <button type="button" id="pagina-siguiente">Siguiente</button>
+      </nav>
+    </section>
+
+    <section class="modulo" id="modulo-envios" aria-labelledby="t-envios">
+      <h2 id="t-envios"><span class="cable verde"></span>4 · Envíos</h2>
+      <blockquote class="ticket">“Escribo ‘bogota’ en la ciudad de envío y no me aparece Bogotá. El buscador no sirve.”</blockquote>
+      <label>Ciudad de envío <input id="buscar-ciudad" type="search" autocomplete="off"></label>
+      <ul class="ciudades" id="ciudades" aria-label="Ciudades encontradas"></ul>
+    </section>
+
+    <section class="modulo" id="modulo-cupon" aria-labelledby="t-cupon">
+      <h2 id="t-cupon"><span class="cable blanco"></span>5 · Pago con cupón</h2>
+      <blockquote class="ticket">“Con el cupón CAFE10K la web me cobra un total distinto al que cobra la caja de la tienda. La web cobra menos.”</blockquote>
+      <form id="form-cupon">
+        <label>Subtotal (COP) <input name="subtotal" type="number" value="50000" min="0" step="100"></label>
+        <label>Cupón <input name="cupon" type="text" autocomplete="off"></label>
+        <button type="submit">Aplicar</button>
+      </form>
+      <p class="resultado" role="status">Total a pagar: <strong id="total-cupon"></strong></p>
+    </section>
+
+    <section class="modulo" id="modulo-notas" aria-labelledby="t-notas">
+      <h2 id="t-notas"><span class="cable naranja"></span>6 · Notas del pedido</h2>
+      <blockquote class="ticket">“Escribo la nota, le doy Guardar, la corrijo y vuelvo a darle Guardar. A veces dice que se guardó la versión vieja. No pasa siempre.”</blockquote>
+      <label>Nota para el pedido <textarea id="nota" rows="2"></textarea></label>
+      <button type="button" id="guardar-nota">Guardar</button>
+      <p class="resultado" role="status" id="nota-guardada"></p>
+    </section>
+  </main>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

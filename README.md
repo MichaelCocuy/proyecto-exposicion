@@ -1,77 +1,109 @@
-# La última cosecha ☕🔪
+# Desactiva la bomba 💣☕
 
-Juego de misterio web para demostrar que automatizar pruebas con Playwright le gana a probar a mano. Un humano y un agente de IA resuelven el mismo caso, en igualdad de condiciones, y se compara quién encuentra primero al asesino.
+Demo para desarrolladores: **un agente de QA con Playwright contra un equipo de desarrolladores**. La tienda de Café La Esmeralda tiene seis bugs reportados por clientes, y cada bug es un cable de una bomba. Arreglarlo bien corta el cable. Hay **10 minutos** y **3 strikes**.
 
-## El caso
+La idea es mostrar que un agente de Playwright no solo "hace clic": reproduce el bug, lo encierra en una prueba que falla, le **pregunta al desarrollador** cuando el requisito es ambiguo, arregla y lo demuestra con la prueba en verde.
 
-Don Aurelio Villamizar aparece muerto en la Hacienda La Esmeralda (Salento, Quindío) la noche en que anunció que cambiaría su testamento. Hay seis sospechosos, seis armas y seis lugares. Para resolverlo hay que acusar correctamente quién, con qué arma y dónde. Cada jugador tiene dos acusaciones.
+## Los seis cables
 
-Cada número de caso (`?caso=1000` a `?caso=9999`) genera un culpable, horarios y pistas distintos, siempre con una única solución.
+| # | Cable | Módulo | Qué reporta el cliente | Qué muestra el agente |
+|---|---|---|---|---|
+| 1 | 🔴 | Ingreso | Rechaza su correo con mayúsculas | Localizadores accesibles, pruebas parametrizadas |
+| 2 | 🔵 | Carrito | El total sale un centavo menos | Aserciones exactas sobre la interfaz |
+| 3 | 🟡 | Pedidos | Faltan los últimos pedidos en la tabla | Paginación |
+| 4 | 🟢 | Envíos | "bogota" no encuentra Bogotá | **Preguntar al desarrollador** |
+| 5 | ⚪ | Pago con cupón | La web cobra distinto que la caja | **Preguntar al desarrollador** |
+| 6 | 🟠 | Notas del pedido | A veces se guarda la versión vieja | Intermitencia e intercepción de red (`page.route`) |
 
-## Qué pone a prueba cada escena
+Los módulos 4 y 5 son **ambiguos a propósito**: hay más de una forma razonable de arreglarlos y solo el desarrollador (el presentador) sabe cuál quiere el negocio. Si alguien adivina mal, suma un strike.
 
-| Escena | Habilidad de automatización |
-|---|---|
-| Portería | Llenar formularios y hacer login |
-| Registro de accesos | Tablas grandes, filtros y paginación |
-| Cámara del corredor | Contenido dentro de un iframe |
-| Laboratorio forense | Esperas por procesos lentos |
-| Estudio | Tooltips que solo aparecen con hover |
-| Caja fuerte | Teclado virtual y bloqueo tras fallos |
-| Carta sellada | Ventanas emergentes |
-| Contestadora | Diálogos modales |
-| Diario | Formularios con clave y paginación |
-| Acusación | Aserción final: `Caso resuelto ✅` |
+## Cómo se evalúa
 
-Hay trampas a propósito: una confesión falsa oculta en el DOM, coartadas parciales y mensajes que parecen coartadas pero caen fuera de la hora del crimen.
+Cada vez que alguien guarda un archivo en `app/src/`, un juez corre pruebas de aceptación ocultas (`juez/`) y actualiza la bomba:
 
-## Cómo correrlo
+- **Cortado ✂️**: el bug quedó bien arreglado.
+- **Casi…**: va bien, pero falta algo que espera el negocio. Toca preguntar.
+- **Strike**: un arreglo que el negocio no quería, o un cambio que vuelve a conectar un cable ya cortado.
+- **💥 BOOM**: 3 strikes o se acabó el tiempo. **💚 Desactivada**: los 6 cables cortados.
+
+## Preparación
 
 ```bash
 npm install
-npx playwright install
-npm start
+npx playwright install chromium
 ```
 
-Abre `http://localhost:3000/?caso=4821&jugador=humano` para el humano. El agente usa la misma URL con `jugador=agente`.
+El agente necesita el MCP de Playwright para navegar. Viene configurado en `.mcp.json`; Claude Code pide aprobarlo la primera vez.
 
-## Con los agentes de Playwright
+### Dos equipos, dos copias del código
+
+Cada equipo arregla su propia copia. En la misma máquina, lo más simple es un worktree para los desarrolladores:
 
 ```bash
-npx playwright init-agents --loop=claude
+git worktree add ../bomba-devs
+cd ../bomba-devs && npm install && npm run start:devs   # desarrolladores → http://localhost:3001
 ```
 
-La prueba `tests/seed.spec.ts` deja al agente dentro de la hacienda. Desde ahí, el planner investiga, el generator escribe la prueba que resuelve el caso y el healer la repara si el sitio cambia.
-
-Para probar la automatización con otros casos:
+Y en esta carpeta, para el agente:
 
 ```bash
-# Linux / macOS
-CASO=1234 npx playwright test
-
-# Windows (PowerShell)
-$env:CASO=1234; npx playwright test
+npm start                                              # agente → http://localhost:3000
 ```
 
-## Reglas de la demo
+Si los desarrolladores trabajan en otra máquina, clonan el repo, corren `npm start` allá y el marcador apunta a su IP.
 
-- Humano y agente usan el mismo número de caso y el mismo cronómetro.
-- El agente solo puede investigar a través de la interfaz, sin leer el código fuente.
-- El caso se da por resuelto cuando aparece `Caso resuelto ✅`.
+### El marcador
+
+Proyecta las dos bombas lado a lado:
+
+```
+http://localhost:3000/marcador?e=Agente@http://localhost:3000&e=Desarrolladores@http://localhost:3001
+```
+
+"Iniciar todas" arranca los dos cronómetros a la vez. Cada bomba también tiene su página propia en `/bomba`, con pausa y reinicio.
+
+## Cómo juega el agente
+
+```bash
+claude --agent qa-playwright
+```
+
+Tiene que correr como **sesión principal**, no como subagente, para poder hacerte preguntas. Dile algo como *"Desactiva la bomba. La tienda está en http://localhost:3000"*.
+
+El agente (`.claude/agents/qa-playwright.md`) trabaja con cuatro skills:
+
+| Skill | Paso |
+|---|---|
+| `qa-plan-bugs` | Lee los tickets, reproduce cada bug en el navegador, clasifica y hace **una ronda de preguntas** |
+| `qa-escribir-spec` | Prueba roja por módulo en `tests/bugs/`, arreglo en `app/src/`, prueba verde |
+| `qa-triage-flaky` | Si una prueba falla a veces: diagnóstico y `page.route` para volverla determinista |
+| `qa-reporte-bug` | Informe final en `reportes/`: causa raíz, arreglo, prueba y línea de tiempo |
+
+## Reglas
+
+- **Nadie abre `juez/`.** Al agente se lo bloquea `.claude/settings.json`; los desarrolladores dan su palabra.
+- Los arreglos van en `app/src/`. La interfaz (`app/index.html`, `app/app.js`) no tiene bugs.
+- Los desarrolladores arreglan **sin IA**. Los dos equipos pueden hacerle al presentador todas las preguntas que quieran.
+- Mismo cronómetro y mismos tickets para los dos.
+
+## Entre partidas
+
+```bash
+npm run reiniciar               # restaura los 6 bugs y deja la bomba en espera
+npm run reiniciar -- --pruebas  # además borra las pruebas escritas (conserva tests/seed.spec.ts)
+```
+
+Con el servidor corriendo, el reinicio también se puede hacer desde el botón "Reiniciar" en `/bomba`. Para otro puerto: `PORT=3001 npm run reiniciar`. Para otra duración: `MINUTOS=15 npm start`.
 
 ## Estructura
 
 ```
-.
-├── .claude/
-│   ├── agents/qa-playwright.md        # Agente de QA con Playwright
-│   └── skills/                        # Skills que usa el agente
-│       ├── qa-test-plan-from-flow/    # Plan de pruebas a partir de un flujo
-│       ├── qa-write-spec-from-plan/   # Escribir specs desde un plan aprobado
-│       ├── qa-bug-report/             # Reporte de bugs con repro y evidencia
-│       └── qa-flaky-triage/           # Diagnóstico de pruebas inestables
-├── public/index.html                  # El juego
-├── server.js                          # Servidor local (puerto 3000)
-├── tests/seed.spec.ts                 # Prueba semilla para el agente
-└── playwright.config.ts
+app/                  la tienda con bugs
+  src/*.js            la lógica de cada módulo: aquí están los bugs
+panel/                la bomba (/bomba) y el marcador (/marcador)
+juez/                 pruebas de aceptación ocultas y bugs originales (no abrir)
+tests/seed.spec.ts    prueba semilla: los 6 módulos cargan
+.claude/              agente qa-playwright, skills y permisos
+scripts/reiniciar.mjs
+server.js             sirve todo y corre el juez cuando cambia app/src
 ```

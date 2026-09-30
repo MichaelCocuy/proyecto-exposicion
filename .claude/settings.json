@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./juez/**)",
+      "Edit(./juez/**)",
+      "Write(./juez/**)",
+      "Read(./.bomba/**)",
+      "Edit(./.bomba/**)",
+      "Write(./.bomba/**)",
+      "Edit(./server.js)",
+      "Write(./server.js)"
+    ]
+  }
+}

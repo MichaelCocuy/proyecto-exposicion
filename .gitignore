@@ -3,5 +3,7 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+.bomba/
+reportes/
 .DS_Store
 .claude/settings.local.json

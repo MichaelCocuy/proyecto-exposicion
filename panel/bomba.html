@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>💣 Bomba</title>
+  <style>
+    :root { --fondo: #0d0f12; --caja: #1b1f24; --metal: #2a3038; --borde: #3a424d; --texto: #e7ecf2; --suave: #8b96a3;
+      --led: #ff3b30; --ok: #34c759; --alerta: #ffcc00;
+      --rojo: #e5382a; --azul: #2f7bf5; --amarillo: #f2c230; --verde: #2fb35f; --blanco: #eeeeee; --naranja: #f5821f; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font: 16px/1.4 system-ui, sans-serif; background: radial-gradient(circle at 50% 0%, #1a1e24, var(--fondo) 70%); color: var(--texto);
+      display: grid; place-items: center; padding: 16px; }
+    body.compacto { padding: 8px; background: var(--fondo); }
+    .bomba { width: min(900px, 100%); background: linear-gradient(180deg, var(--metal), var(--caja)); border: 2px solid var(--borde); border-radius: 18px;
+      padding: 20px; box-shadow: 0 20px 60px #000a, inset 0 1px 0 #ffffff14; }
+    .arriba { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+    .equipo { font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--suave); font-size: 14px; }
+    .pantalla { background: #050505; border: 2px solid #000; border-radius: 10px; padding: 8px 18px; box-shadow: inset 0 0 20px #000; }
+    .tiempo { font: 700 clamp(48px, 10vw, 96px)/1 ui-monospace, 'SFMono-Regular', Menlo, monospace; color: var(--led); text-shadow: 0 0 18px #ff3b3099; letter-spacing: .04em; }
+    .strikes { display: flex; gap: 10px; align-items: center; }
+    .strikes span { width: 34px; height: 34px; border-radius: 50%; background: #300; border: 2px solid #511; display: grid; place-items: center; font-weight: 800; color: transparent; }
+    .strikes span.on { background: var(--led); border-color: #f88; color: #fff; box-shadow: 0 0 16px var(--led); }
+    .cables { margin: 20px 0 8px; display: grid; gap: 10px; }
+    .fila { display: grid; grid-template-columns: 150px 1fr 170px; gap: 12px; align-items: center; }
+    .nombre { font-size: 14px; color: var(--suave); text-align: right; }
+    .nombre b { display: block; color: var(--texto); font-size: 15px; }
+    svg { width: 100%; height: 34px; overflow: visible; }
+    .borne { fill: #555d68; stroke: #222; }
+    .estado { font-size: 13px; font-weight: 600; }
+    .estado.desactivado { color: var(--ok); } .estado.parcial { color: var(--alerta); } .estado.mal, .estado.error { color: var(--led); }
+    .estado small { display: block; font-weight: 400; color: var(--suave); }
+    .fila.parcial svg path { animation: parpadeo 1s infinite; }
+    @keyframes parpadeo { 50% { opacity: .45; } }
+    .controles { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    button { font: 600 15px system-ui; padding: 10px 18px; border-radius: 10px; border: 1px solid var(--borde); background: #2d343d; color: var(--texto); cursor: pointer; }
+    button.principal { background: var(--led); border-color: var(--led); color: #fff; }
+    button:disabled { opacity: .35; cursor: default; }
+    .mensaje { color: var(--alerta); font-size: 14px; align-self: center; }
+    .eventos { margin: 16px 0 0; padding: 12px; list-style: none; background: #0008; border-radius: 10px; font: 13px/1.6 ui-monospace, monospace; max-height: 160px; overflow: auto; }
+    .eventos li.strike, .eventos li.fin-mal { color: var(--led); } .eventos li.corte, .eventos li.fin-ok { color: var(--ok); }
+    .eventos:empty::before { content: 'Esperando el inicio…'; color: var(--suave); }
+    .final { position: fixed; inset: 0; display: none; place-items: center; text-align: center; font: 800 clamp(40px, 9vw, 110px)/1.1 system-ui; z-index: 5; }
+    .final small { display: block; font-size: .3em; font-weight: 600; opacity: .85; margin-top: 12px; }
+    body[data-fase="explotada"] .final { display: grid; background: radial-gradient(circle, #ffb300ee, #d62d20ee 45%, #1a0000f5 80%); animation: boom .6s ease-out; }
+    body[data-fase="desactivada"] .final { display: grid; background: #0b3d1ef0; color: #b9ffcf; }
+    body[data-fase="explotada"] .bomba { animation: temblor .4s 3; }
+    @keyframes boom { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes temblor { 25% { transform: translate(-8px, 4px); } 75% { transform: translate(8px, -4px); } }
+    body.compacto .final { position: absolute; }
+    body.compacto .controles { display: none; }
+    body.compacto .fila { grid-template-columns: 110px 1fr 120px; }
+    @media (max-width: 640px) {
+      .fila { grid-template-columns: 1fr; gap: 2px; } .nombre { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <main class="bomba">
+    <div class="arriba">
+      <div>
+        <div class="equipo" id="equipo">Bomba</div>
+        <div class="pantalla"><div class="tiempo" id="tiempo" aria-live="off">10:00</div></div>
+      </div>
+      <div class="strikes" aria-label="Strikes" id="strikes"></div>
+    </div>
+    <div class="cables" id="cables"></div>
+    <div class="controles">
+      <button class="principal" id="iniciar">Iniciar cuenta regresiva</button>
+      <button id="pausa">Pausa</button>
+      <button id="reiniciar">Reiniciar</button>
+      <span class="mensaje" id="mensaje" role="status"></span>
+    </div>
+    <ul class="eventos" id="eventos"></ul>
+  </main>
+  <div class="final" id="final" role="alert"></div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    if (params.has('compacto')) document.body.classList.add('compacto');
+    if (params.get('equipo')) document.getElementById('equipo').textContent = params.get('equipo');
+    const $ = (id) => document.getElementById(id);
+    const reloj = (ms) => { const s = Math.ceil(ms / 1000); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
+    const ETIQUETAS = { activo: 'Conectado', desactivado: 'Cortado ✂️', parcial: 'Casi…', mal: 'Arreglo incorrecto', error: 'No carga' };
+
+    function cable(c) {
+      const color = `var(--${c.color})`;
+      const cortado = c.estado === 'desactivado';
+      const trazo = cortado
+        ? `<path d="M8 17 C 80 4, 150 30, 215 20 L 228 30" stroke="${color}" stroke-width="7" fill="none" stroke-linecap="round"/>
+           <path d="M272 30 L 285 20 C 350 4, 420 30, 492 17" stroke="${color}" stroke-width="7" fill="none" stroke-linecap="round"/>
+           <circle cx="229" cy="31" r="3" fill="#c8a45a"/><circle cx="271" cy="31" r="3" fill="#c8a45a"/>`
+        : `<path d="M8 17 C 120 2, 200 32, 250 17 S 400 2, 492 17" stroke="${color}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+      return `<div class="fila ${c.estado}">
+        <div class="nombre"><b>${c.nombre}</b>cable ${c.color}</div>
+        <svg viewBox="0 0 500 34" preserveAspectRatio="none" aria-hidden="true">
+          <rect class="borne" x="0" y="9" width="14" height="16" rx="3"/><rect class="borne" x="486" y="9" width="14" height="16" rx="3"/>${trazo}
+        </svg>
+        <div class="estado ${c.estado}">${ETIQUETAS[c.estado] ?? c.estado}${c.pista && c.estado !== 'desactivado' ? `<small>${c.pista}</small>` : ''}</div>
+      </div>`;
+    }
+
+    let ultimo = '';
+    async function actualizar() {
+      let e;
+      try { e = await fetch('/api/estado').then((r) => r.json()); } catch { $('mensaje').textContent = 'Sin conexión con el servidor…'; return; }
+      document.body.dataset.fase = e.fase;
+      $('tiempo').textContent = reloj(e.restanteMs);
+      $('strikes').innerHTML = Array.from({ length: e.maxStrikes }, (_, i) => `<span class="${i < e.strikes ? 'on' : ''}">✕</span>`).join('');
+      const firma = JSON.stringify([e.cables, e.eventos]);
+      if (firma !== ultimo) {
+        ultimo = firma;
+        $('cables').innerHTML = e.cables.map(cable).join('');
+        $('eventos').innerHTML = e.eventos.map((ev) => `<li class="${ev.tipo}">[${ev.reloj}] ${ev.texto}</li>`).join('');
+        $('eventos').scrollTop = 1e6;
+      }
+      $('iniciar').disabled = e.fase !== 'espera';
+      $('pausa').disabled = !['corriendo', 'pausa'].includes(e.fase);
+      $('reiniciar').disabled = ['corriendo', 'pausa'].includes(e.fase);
+      $('pausa').textContent = e.fase === 'pausa' ? 'Continuar' : 'Pausa';
+      const fin = e.eventos.at(-1)?.texto ?? '';
+      if (e.fase === 'explotada') $('final').innerHTML = `💥 BOOM<small>${fin.replace('💣 BOOM: ', '')} · ${e.cortados}/6 cables cortados</small>`;
+      if (e.fase === 'desactivada') $('final').innerHTML = `💚 DESACTIVADA<small>${reloj(e.duracionMs - e.restanteMs)} · ${e.strikes} strikes</small>`;
+      if (!['explotada', 'desactivada'].includes(e.fase)) $('final').innerHTML = '';
+    }
+
+    async function enviar(accion) {
+      const r = await fetch('/api/' + accion, { method: 'POST' });
+      const cuerpo = await r.json();
+      $('mensaje').textContent = cuerpo.error ?? '';
+      actualizar();
+    }
+    $('iniciar').addEventListener('click', () => enviar('iniciar'));
+    $('pausa').addEventListener('click', () => enviar('pausa'));
+    $('reiniciar').addEventListener('click', () => confirm('¿Restaurar los 6 bugs y reiniciar la bomba?') && enviar('reiniciar'));
+    $('final').addEventListener('click', () => ($('final').style.display = 'none'));
+    setInterval(actualizar, 500);
+    actualizar();
+  </script>
+</body>
+</html>

@@ -11,7 +11,7 @@ Un bug intermitente no se arregla "a ver si pasa". Primero se vuelve **determini
 
 2. **Mira la red.** `browser_network_requests` muestra las llamadas a `/api/guardar` y cuánto tardó cada una (el servidor responde con una demora aleatoria de 100 a 900 ms). Hipótesis: si la primera respuesta llega **después** de la segunda, la pantalla muestra la versión vieja.
 
-3. **Fuerza la carrera con `page.route`.** Con `browser_run_code_unsafe` (pide confirmación al presentador; explica en una línea qué hace), guarda dos veces seguidas controlando la demora de cada respuesta:
+3. **Fuerza la carrera con `page.route`.** Con `browser_run_code_unsafe` (pide confirmación a tu equipo; explica en una línea qué hace), guarda dos veces seguidas controlando la demora de cada respuesta:
    ```js
    async (page) => {
      // La primera respuesta llega tarde y la segunda rápido: el orden que dispara el bug.

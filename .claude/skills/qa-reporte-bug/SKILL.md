@@ -3,7 +3,7 @@ name: qa-reporte-bug
 description: Escribe el informe de la partida en reportes/, con un reporte por bug (qué reportó el cliente, cómo se reprodujo, qué preguntó y respondió el desarrollador, causa raíz, arreglo, prueba de regresión y evidencia) y un resumen con el tiempo y los strikes de la bomba. Úsala al terminar la partida, o antes si un bug no se pudo arreglar y hay que dejarlo documentado para un humano.
 ---
 
-Produce un **informe en markdown** en `reportes/desactivacion-<AAAA-MM-DD-HHMM>.md`. Es lo que se muestra al público al final: la prueba de que el agente no solo "arregló cosas", sino que dejó cada bug documentado y cubierto por una prueba. No abras issues ni hagas commits: eso lo decide el equipo.
+Produce un **informe en markdown** en `reportes/desactivacion-<AAAA-MM-DD-HHMM>.md`. Es lo que el equipo muestra al final: la prueba de que el agente no solo "arregló cosas", sino que dejó cada bug documentado y cubierto por una prueba. No abras issues ni hagas commits: eso lo decide el equipo.
 
 ## Pasos
 
@@ -39,7 +39,7 @@ Módulos con el cable conectado, o "Casi…": qué se intentó, qué falta y qu�
 Los eventos de la bomba (minuto y texto), tal como los devuelve `/api/estado`.
 ```
 
-4. **No omitas secciones.** Si un bug no necesitó preguntas, dilo explícitamente. Si hubo strikes, explica qué los causó: es lo más instructivo para el público.
+4. **No omitas secciones.** Si un bug no necesitó preguntas, dilo explícitamente. Si hubo strikes, explica qué los causó: es lo más instructivo para todos.
 
 ## Qué evitar
 

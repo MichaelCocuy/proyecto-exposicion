@@ -8,3 +8,5 @@ reportes/
 .DS_Store
 .claude/settings.local.json
 .playwright-mcp/
+# Guía del presentador con las respuestas: solo en la máquina del presentador (el repo es público).
+juez/README.md

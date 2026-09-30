@@ -1,4 +1,5 @@
 {
+  "agent": "qa-playwright",
   "enabledMcpjsonServers": [
     "playwright"
   ],
@@ -6,25 +7,20 @@
     "allow": [
       "mcp__playwright",
       "Edit(./app/src/**)",
-      "Write(./app/src/**)",
       "Edit(./tests/**)",
-      "Write(./tests/**)",
-      "Write(./reportes/**)",
       "Bash(npx playwright test:*)",
       "Bash(curl -s localhost:3000/api/estado)",
       "Bash(curl -s http://localhost:3000/api/estado)",
       "Bash(git diff:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Edit(./reportes/**)"
     ],
     "deny": [
       "Read(./juez/**)",
       "Edit(./juez/**)",
-      "Write(./juez/**)",
       "Read(./.bomba/**)",
       "Edit(./.bomba/**)",
-      "Write(./.bomba/**)",
-      "Edit(./server.js)",
-      "Write(./server.js)"
+      "Edit(./server.js)"
     ],
     "ask": [
       "mcp__playwright__browser_run_code_unsafe"

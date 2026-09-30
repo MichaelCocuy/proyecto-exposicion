@@ -1,10 +1,9 @@
 {
   "name": "desactiva-la-bomba",
   "version": "1.0.0",
-  "description": "Demo: un agente de Playwright contra un equipo de desarrolladores. Seis bugs, diez minutos, una bomba.",
+  "description": "Ejercicio: cada equipo guía a un agente de Playwright para desactivar una bomba. Seis bugs, diez minutos.",
   "scripts": {
     "start": "node server.js",
-    "start:devs": "PORT=3001 node server.js",
     "reiniciar": "node scripts/reiniciar.mjs",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
@@ -14,5 +13,8 @@
   "devDependencies": {
     "@playwright/test": "^1.56.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.11"
+  }
 }

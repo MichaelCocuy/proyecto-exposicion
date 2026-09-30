@@ -3,7 +3,7 @@ name: qa-arreglar-con-mcp
 description: Arregla un bug de la bomba y lo demuestra en el navegador con el Playwright MCP. Muestra el ❌ en la tienda, guarda el arreglo de app/src/<modulo>.js de una sola vez, recarga, repite los pasos del ticket, muestra el ✅ y confirma que el cable se cortó sin reconectar otros. Úsala por cada módulo después de qa-plan-bugs, con las respuestas del desarrollador en la mano.
 ---
 
-Es el ciclo central de la demo, y el público lo ve en el navegador: **❌ en pantalla → arreglo → ✅ en pantalla → cable cortado**. Todo lo que pasa en la tienda se hace con el Playwright MCP, no con specs.
+Es el ciclo central del ejercicio, y tu equipo lo ve en el navegador: **❌ en pantalla → arreglo → ✅ en pantalla → cable cortado**. Todo lo que pasa en la tienda se hace con el Playwright MCP, no con specs.
 
 ## Prerrequisito
 
